@@ -3,15 +3,53 @@ package com.hcl.retailbanking.util;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
-/**
- * @author Sri Keerthna. This is a Util class for Transaction table.
- */
 public class Utils {
+
+	private Utils() {
+	}
+
+	private static final Random random = new Random();
+
+	/**
+	 * generateRandom()
+	 *
+	 * @param size
+	 * @return
+	 */
+	public static int generateRandom(int size) {
+		return random.nextInt(size);
+	}
+
+	/**
+	 * getCurrentDate()
+	 *
+	 * @return
+	 */
+	public static LocalDate getCurrentDate() {
+		return LocalDate.now();
+	}
+
+	/**
+	 * getNextDate()
+	 *
+	 * @param date
+	 * @param count
+	 * @return
+	 */
+	public static Date getNextDate(Date date, Integer count) {
+		final Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.DAY_OF_YEAR, count);
+		return calendar.getTime();
+	}
 
 	/**
 	 * Passing month and year and converting in date format
+	 * 
 	 * @param month
 	 * @param year
 	 * @return
@@ -24,7 +62,7 @@ public class Utils {
 		int days = date1.lengthOfMonth();
 
 		LocalDate date2 = LocalDate.of(year, monthInt, days);
-		if (date2 != null) {
+		if (date1 != null && date2 != null) {
 			dates.add(date1);
 			dates.add(date2);
 		}
@@ -33,6 +71,7 @@ public class Utils {
 
 	/**
 	 * Month is taken as string datatype and converted into integer datatype
+	 * 
 	 * @param month
 	 * @return
 	 */
@@ -76,6 +115,18 @@ public class Utils {
 		return 0;
 	}
 
-
+	/**
+	 * @description is used to calculate the age
+	 * calculateAge() 
+	 * @param dob
+	 * @return
+	 */
+	public static Integer calculateAge(LocalDate dob) {
+		// TODO Auto-generated method stub
+		if(dob!=null)
+			return LocalDate.now().getYear() - dob.getYear();
+		return 0;
+	}
+	
 
 }

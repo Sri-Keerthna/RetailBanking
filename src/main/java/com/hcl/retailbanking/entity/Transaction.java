@@ -1,5 +1,6 @@
 package com.hcl.retailbanking.entity;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 import javax.persistence.Entity;
@@ -8,57 +9,32 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @author Sri Keerthna. This is a Transaction class for Transaction table. It
- *         has 7 parameters
+ * @author Vasavi
+ *
  */
-
-@Getter
-@Setter
-@NoArgsConstructor
 @Entity
-@Table(name = "transaction")
-public class Transaction {
+@Table(name = "transactions")
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Transaction implements Serializable {
 
-	/*
-	 * @param The transaction id of the transaction
-	 */
+	private static final long serialVersionUID = 1L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer transactionId;
-
-	/*
-	 * @param The Account number from which amount will be debit.
-	 */
 	private Long fromAccount;
-
-	/*
-	 * @param The benefactor name
-	 */
-	private String benefactorName;
-
-	/*
-	 * @param The Account number to which amount will be credit.
-	 */
 	private Long toAccount;
-
-	/*
-	 * @param The amount to transfer
-	 */
 	private Double amount;
-
-	/*
-	 * @param The status of the transaction
-	 */
 	private String transactionType;
-
-	/*
-	 * @param The transaction date
-	 */
 	private LocalDate transactionDate;
+	private String benefactorName;
 
 }

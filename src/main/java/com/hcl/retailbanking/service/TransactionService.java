@@ -1,25 +1,40 @@
 package com.hcl.retailbanking.service;
 
-import java.text.ParseException;
 import java.util.List;
 
+import com.hcl.retailbanking.dto.AccountSummaryDto;
+import com.hcl.retailbanking.dto.FundTransferRequestDto;
+import com.hcl.retailbanking.dto.FundTransferResponseDto;
 import com.hcl.retailbanking.dto.TransactionDto;
 import com.hcl.retailbanking.entity.Transaction;
 
 /**
- * @author Sri Keerthna. This is a TransactionService interface for Transaction table. It
- *         has 3 methods
+ * The interface TransactionService.
+ * 
+ * @author Vasavi
+ *
  */
-
 public interface TransactionService {
+	/**
+	 * 
+	 * @description this method is used to do fund transfer in the application.
+	 * @param fundTransferRequestDTO the fundTransferRequestDTO which contains
+	 *                               fromAccount,toAccount,amount,transactionType
+	 *                               and benefactorName.
+	 * @return fundTransferResponseDto
+	 */
+	public FundTransferResponseDto fundTransfer(FundTransferRequestDto fundTransferRequestDTO);
+
+	public AccountSummaryDto accountSummary(Integer userId);
 
 	/**
-	 * From TransactionDto input is taken as month and year from user and transactions are fetched
+	 * From TransactionDto input is taken as month and year from user and
+	 * transactions are fetched
+	 * 
 	 * @param transactionDto
 	 * @return list of transactions that are taken place in a month
-	 * @throws ParseException 
+	 * @throws ParseException
 	 */
-//	public List<Transaction> viewTransactions(TransactionDto transactionDto);
+	public List<Transaction> viewTransactions(TransactionDto transactionDto);
 
-	public List<Transaction> viewTransactions(String month, Integer year, Integer userId);
 }

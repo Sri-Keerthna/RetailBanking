@@ -5,15 +5,20 @@ import org.springframework.stereotype.Repository;
 
 import com.hcl.retailbanking.entity.Account;
 
+/**
+ * @author Vasavi
+ *
+ */
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Integer>{
+public interface AccountRepository extends JpaRepository<Account, Long> {
+	public Account findByUserId(Integer userId);
 
 	/**
-	 * @author Sri Keerthna
-	 * By using userId find the account number
+	 * @author Sri Keerthna By using userId find the account number
 	 * @param userId
 	 * @return
 	 */
-	Account findAccountNumberByUserId(Integer userId);
+	public Account findAccountNumberByUserId(Integer userId);
+
 
 }

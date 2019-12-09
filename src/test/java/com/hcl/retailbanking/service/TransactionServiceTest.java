@@ -52,7 +52,7 @@ public class TransactionServiceTest {
 
 		account.setAccountNumber(1234L);
 		account.setAccountType("Savings");
-		account.setIfsC("SBI0010");
+		account.setIfscCode("SBI0010");
 		account.setUserId(1);
 		accounts.add(account);
 

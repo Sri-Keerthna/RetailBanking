@@ -1,10 +1,14 @@
 package com.hcl.retailbanking.controller;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,31 +16,150 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.hcl.retailbanking.controller.TransactionController;
-import com.hcl.retailbanking.dto.ApiResponseDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hcl.retailbanking.dto.AccountSummaryDto;
+import com.hcl.retailbanking.dto.FundTransferRequestDto;
+import com.hcl.retailbanking.dto.FundTransferResponseDto;
 import com.hcl.retailbanking.dto.TransactionDto;
 import com.hcl.retailbanking.entity.Account;
 import com.hcl.retailbanking.entity.Transaction;
 import com.hcl.retailbanking.service.TransactionService;
-import com.hcl.retailbanking.service.TransactionServiceImpl;
+import com.hcl.retailbanking.util.StringConstant;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+/**
+ * @author Vasavi
+ * @description this class is used for to test operation for fund transfer
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
 public class TransactionControllerTest {
-
-	@InjectMocks
-	TransactionController transactionController;
-
+	/**
+	 * The Constant log.
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(TransactionControllerTest.class);
+	/**
+	 * The transactionService.
+	 */
 	@Mock
 	TransactionService transactionService;
 
+	/**
+	 * The transactionController.
+	 */
+	@InjectMocks
+	TransactionController transactionController;
+
+	MockMvc mockMvc;
+	AccountSummaryDto accountSummaryDto = new AccountSummaryDto();
+	static Account account = new Account();
+
+	@Before
+	public void init() {
+		MockitoAnnotations.initMocks(this);
+	}
+
+	@Test
+	public void testFundTransfer() {
+		logger.info("Inside the fundTransferTest method");
+		FundTransferRequestDto fundTransferRequestDto = new FundTransferRequestDto();
+		fundTransferRequestDto.setFromAccount(1234567810L);
+		fundTransferRequestDto.setToAccount(1234567891L);
+		fundTransferRequestDto.setAmount(500.00);
+		fundTransferRequestDto.setBenefactorName("vasavi");
+		FundTransferResponseDto fundTransferResponseDto = new FundTransferResponseDto();
+		fundTransferResponseDto.setMessage("Succesfully Transferred");
+		fundTransferResponseDto.setToAccount(1234567810L);
+		fundTransferResponseDto.setToAccount(1234567891L);
+		fundTransferResponseDto.setAmount(1000.00);
+		when(transactionService.fundTransfer(fundTransferRequestDto)).thenReturn(fundTransferResponseDto);
+		ResponseEntity<FundTransferResponseDto> result = transactionController.fundTransfer(fundTransferRequestDto);
+		assertEquals("Succesfully Transferred", result.getBody().getMessage());
+
+	}
+
+	public static String asJsonString(final Object obj) {
+		try {
+			return new ObjectMapper().writeValueAsString(obj);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+
+		}
+
+	}
+
+	/**
+	 * setUp()
+	 *
+	 * @throws Exception
+	 */
+	@Before
+	public void setUp() throws Exception {
+		account.setUserId(123445);
+		account.setAccountNumber(1223346L);
+		account.setBalance(3000D);
+		account.setAccountType(StringConstant.ACCOUNT_TYPE);
+		account.setIfscCode("HCL98989");
+
+		Transaction transaction = new Transaction();
+		transaction.setTransactionId(1);
+		transaction.setFromAccount(1223455L);
+
+		accountSummaryDto.setTransactions(getMockData());
+		accountSummaryDto.setAccount(account);
+
+		mockMvc = MockMvcBuilders.standaloneSetup(transactionController).build();
+	}
+
+	public static List<Transaction> getMockData() {
+		return Stream.of(new Transaction(), new Transaction()).collect(Collectors.toList());
+	}
+
+	/**
+	 * testGetSummaryForPositive()
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testGetSummaryForPositive() throws Exception {
+		Integer userId = 123456;
+		 mockMvc
+				.perform(MockMvcRequestBuilders.get("/transactions/" + userId).accept(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+		Mockito.when(transactionService.accountSummary(userId)).thenReturn(accountSummaryDto);
+
+		Mockito.verify(transactionService).accountSummary(userId);
+	}
+
+	/**
+	 * testGetSummaryForNegative()
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void testGetSummaryForNegative() throws Exception {
+
+		Integer userId = null;
+		mockMvc.perform(MockMvcRequestBuilders.get("/transactions/" + userId).accept(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isBadRequest()).andReturn();
+		Mockito.when(transactionService.accountSummary(userId)).thenReturn(accountSummaryDto);
+		// Mockito.verify(transactionService).accountSummary(userId);
+		assertNotNull(transactionService.accountSummary(userId));
+	}
+	
 	static TransactionDto transactionDto = new TransactionDto();
 	static List<Transaction> lstTransaction = new ArrayList<>();
-	static ApiResponseDto apiResponseDto = new ApiResponseDto();
+
 	/**
 	 * @author Sri Keerthna
 	 * Values are initialized for transactionDto, transaction and Accounts
@@ -51,7 +174,7 @@ public class TransactionControllerTest {
 		Account account = new Account();
 		account.setAccountNumber(1234L);
 		account.setAccountType("Savings");
-		account.setIfsC("SBI0010");
+		account.setIfscCode("SBI0010");
 		account.setUserId(1);
 		accounts.add(account);
 
@@ -66,8 +189,6 @@ public class TransactionControllerTest {
 		lstTransaction.add(transaction);
 	}
 
-	
-	private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
 	/**
 	 * @author Sri Keerthna
 	 * Positive test case. If the transactions are available for a particular
@@ -78,7 +199,6 @@ public class TransactionControllerTest {
 		Mockito.when(transactionService.viewTransactions(transactionDto)).thenReturn(lstTransaction);
 		HttpStatus statuscode = transactionController.viewTransaction(transactionDto).getStatusCode();
 		assertEquals(HttpStatus.OK, statuscode);
-		
 
 	}
 
@@ -92,7 +212,6 @@ public class TransactionControllerTest {
 		transactionDto.setMonth(null);
 
 		Mockito.when(transactionService.viewTransactions(transactionDto)).thenReturn(null);
-		logger.debug("Data entered has a null value");
 		HttpStatus statuscode = transactionController.viewTransaction(transactionDto).getStatusCode();
 		assertEquals(HttpStatus.OK, statuscode);
 
@@ -107,7 +226,6 @@ public class TransactionControllerTest {
 		transactionDto.setYear(null);
 
 		Mockito.when(transactionService.viewTransactions(transactionDto)).thenReturn(null);
-		logger.debug("Data entered has a null value");
 		HttpStatus statuscode = transactionController.viewTransaction(transactionDto).getStatusCode();
 		assertEquals(HttpStatus.OK, statuscode);
 
@@ -122,7 +240,6 @@ public class TransactionControllerTest {
 		transactionDto.setUserId(null);
 
 		Mockito.when(transactionService.viewTransactions(transactionDto)).thenReturn(null);
-		logger.debug("Data entered has a null value");
 		HttpStatus statuscode = transactionController.viewTransaction(transactionDto).getStatusCode();
 		assertEquals(HttpStatus.OK, statuscode);
 
@@ -139,7 +256,6 @@ public class TransactionControllerTest {
 		transactionDto.setUserId(null);
 
 		Mockito.when(transactionService.viewTransactions(transactionDto)).thenReturn(null);
-		logger.debug("Data entered has a null value");
 		HttpStatus statuscode = transactionController.viewTransaction(transactionDto).getStatusCode();
 		assertEquals(HttpStatus.OK, statuscode);
 
@@ -152,9 +268,7 @@ public class TransactionControllerTest {
 	@Test
 	public void viewTransactionsNegativeTestEmpty() {
 		Mockito.when(transactionService.viewTransactions(transactionDto)).thenReturn(lstTransaction);
-		logger.debug("Result has a empty set");
 		HttpStatus statuscode = transactionController.viewTransaction(transactionDto).getStatusCode();
 		assertEquals(HttpStatus.OK, statuscode);
 	}
-
 }
